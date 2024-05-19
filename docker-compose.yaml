@@ -1,5 +1,5 @@
 
-version: '3.4'
+version: '3.8'
 
 services:
   web:
@@ -9,9 +9,9 @@ services:
     depends_on:
       - db
     environment:
-      SPRING_DATASOURCE_URL: ${ secrets.DB_URL }
+      SPRING_DATASOURCE_URL: jdbc:mysql://ceos-db.catymkthpwcp.ap-northeast-2.rds.amazonaws.com/ceos
       SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: ${ secrets.DB_PASSWORD }
+      SPRING_DATASOURCE_PASSWORD: Ab1356!!g
 
   nginx:
     container_name: nginx
