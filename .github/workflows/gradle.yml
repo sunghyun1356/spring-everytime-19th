@@ -1,5 +1,6 @@
-name: Ceos Server
-# test용 commit 6
+name: Deploy Development Server
+
+## develop 브랜치에 push가 되면 실행됩니다
 on:
   push:
     branches: [ "master" ]
@@ -11,55 +12,28 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+
       - name: checkout
         uses: actions/checkout@v4
 
+      ## 여러분이 사용하는 버전을 사용하세요
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Set up NTP
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ntp
-          sudo service ntp start
-
-      - name: permission give for gradlew
-        run: chmod +x ./gradlew
-
+      ## gradle build
       - name: Build with Gradle
-        run: ./gradlew bootJar -x test
+        run: ./gradlew bootJar
 
+
+      ## 웹 이미지 빌드 및 도커허브에 push
       - name: web docker build and push
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-              ca-certificates \
-              curl \
-              gnupg \
-              lsb-release
-          sudo mkdir -p /etc/apt/keyrings
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-          echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-            $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-          sudo apt-get update
-          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-
-          sudo systemctl start docker
-          sudo systemctl enable docker
-
-          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
-
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-
           docker build -t sunghyun1356/ceos .
           docker push sunghyun1356/ceos
-          
           docker build -f dockerfile-nginx -t sunghyun1356/ceos_nginx .
           docker push sunghyun1356/ceos_nginx
 
@@ -70,36 +44,22 @@ jobs:
           username: ubuntu
           key: ${{ secrets.KEY }}
           script: |
-            sudo apt-get update
-            sudo apt-get install -y \
-                ca-certificates \
-                curl \
-                gnupg \
-                lsb-release
-            sudo mkdir -p /etc/apt/keyrings
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-            echo \
-              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-              $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-            sudo apt-get update
-            sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-            sudo systemctl start docker
-            sudo systemctl enable docker
-            sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-            sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
-
-            cd /home/ubuntu/
             
-            sudo touch .env
-            echo "${{ secrets.ENV_VARS }}" | sudo tee .env > /dev/null
+            ## 여러분이 원하는 경로로 이동합니다.
+                    cd /home/ubuntu/
             
-            sudo touch docker-compose.yaml
-            echo "${{ vars.DOCKER_COMPOSE }}" | sudo tee docker-compose.yaml > /dev/null
+            ## .env 파일을 생성합니다.
+                    sudo touch .env
+                    echo "${{ secrets.ENV_VARS }}" | sudo tee .env > /dev/null
             
-            sudo chmod 666 /var/run/docker.sock
-            sudo docker rm -f $(docker ps -qa)
-            sudo docker pull sunghyun1356/ceos
-            sudo docker pull sunghyun1356/ceos_nginx
-            docker-compose -f docker-compose.yaml --env-file ./.env up -d
-            docker image prune -f
+            ## docker-compose.yaml 파일을 생성합니다.
+                    sudo touch docker-compose.yaml
+                    echo "${{ vars.DOCKER_COMPOSE }}" | sudo tee docker-compose.yaml > /dev/null
+            
+            ## docker-compose를 실행합니다.
+                    sudo chmod 666 /var/run/docker.sock
+                    sudo docker rm -f $(docker ps -qa)
+                    sudo docker pull sunghyun1356/ceos
+                    sudo docker pull sunghyun1356/ceos_nginx
+                    docker-compose -f docker-compose.yaml --env-file ./.env up -d
+                    docker image prune -f
