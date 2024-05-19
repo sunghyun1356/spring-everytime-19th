@@ -1,9 +1,9 @@
 spring:
   #
   datasource:
-    url: ${{ secrets.DB_URL }}
+    url: ${ secrets.DB_URL }
     username: admin
-    password: ${{ secrets.DB_PASSWORD }}
+    password: ${ secrets.DB_PASSWORD }
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     show-sql: true

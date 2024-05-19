@@ -34,7 +34,7 @@ jobs:
       ## 웹 이미지 빌드 및 도커허브에 push
       - name: Web Docker build and push
         run: |
-          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
           docker build -t sunghyun1356/ceos .
           docker push sunghyun1356/ceos
           docker build -f dockerfile-nginx -t sunghyun1356/ceos_nginx .
@@ -63,7 +63,7 @@ jobs:
             
             ## docker-compose를 실행합니다.
             sudo chmod 666 /var/run/docker.sock
-            sudo docker ps -qa | xargs -r sudo docker rm -f
+            sudo docker rm -f $(sudo docker ps -qa)
             sudo docker pull sunghyun1356/ceos
             sudo docker pull sunghyun1356/ceos_nginx
             sudo docker-compose -f docker-compose.yaml --env-file ./.env up -d
