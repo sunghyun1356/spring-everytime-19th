@@ -1,0 +1,12 @@
+version: "4"
+services:
+  web:
+    image: sunghyun1356/ceos:latest
+    container_name: ceos_container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod

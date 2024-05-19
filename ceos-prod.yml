@@ -1,0 +1,6 @@
+ceos:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://ceos.catymkthpwcp.ap-northeast-2.rds.amazonaws.com:3306/ceos?serverTimezone=Asia/Seoul
+    username: admin
+    password: ${{ secrets.DB_PASSWORD }}
