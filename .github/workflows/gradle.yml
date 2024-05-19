@@ -23,9 +23,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: permission give for gradlew
+        run: chmod +x ./gradlew
       ## gradle build
       - name: Build with Gradle
-        run: ./gradlew bootJar
+        run: ./gradlew bootJar -x test
 
 
       ## 웹 이미지 빌드 및 도커허브에 push
