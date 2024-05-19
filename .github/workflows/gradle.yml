@@ -1,6 +1,5 @@
 name: Ceos Server
 
-## master 브랜치에 push가 되면 실행됩니다
 on:
   push:
     branches: [ "master" ]
@@ -10,108 +9,97 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # 작업을 실행할 가상 환경을 Ubuntu 최신 버전으로 설정
+    runs-on: ubuntu-latest
     steps:
-
-      # 현재 브랜치를 비어있는 ubuntu에 내려받는다
       - name: checkout
-        uses: actions/checkout@v4  # GitHub Actions 체크아웃 액션을 사용하여 리포지토리의 코드를 체크아웃
+        uses: actions/checkout@v4
 
-      # 맞는 java 버전 다운로드
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'  # 설치할 JDK 버전을 17로 설정
-          distribution: 'temurin'  # 설치할 JDK의 배포판을 Temurin으로 설정
+          java-version: '17'
+          distribution: 'temurin'
 
-      # 시간 동기화 시키기
       - name: Set up NTP
         run: |
-          sudo apt-get update  # 시스템 패키지 목록을 업데이트
-          sudo apt-get install -y ntp  # NTP(Network Time Protocol) 패키지를 설치
-          sudo service ntp start  # NTP 서비스를 시작
+          sudo apt-get update
+          sudo apt-get install -y ntp
+          sudo service ntp start
 
-      # 권한 설정하기
       - name: permission give for gradlew
-        run: chmod +x ./gradlew  # gradlew 파일에 실행 권한을 부여
+        run: chmod +x ./gradlew
 
-      ## gradle build
       - name: Build with Gradle
-        run: ./gradlew bootJar -x test  # Gradle을 사용하여 프로젝트를 빌드하고 테스트는 제외
+        run: ./gradlew bootJar -x test
 
-      ## 웹 이미지 빌드 및 도커허브에 push
       - name: web docker build and push
         run: |
           sudo apt-get update
-          sudo apt-get install -y \  
-              ca-certificates \  
-              curl \  
-              gnupg \  
-              lsb-release  
-          sudo mkdir -p /etc/apt/keyrings  # apt 키링 디렉토리를 만듭니다
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg  # Docker의 GPG 키를 다운로드하여 apt 키링에 추가
+          sudo apt-get install -y \
+              ca-certificates \
+              curl \
+              gnupg \
+              lsb-release
+          sudo mkdir -p /etc/apt/keyrings
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
           echo \
             "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-            $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null  # Docker 저장소를 apt 소스 목록에 추가
-          sudo apt-get update  # Docker 저장소가 추가된 후 패키지 목록을 업데이트
-          sudo apt-get install -y docker-ce docker-ce-cli containerd.io  # Docker CE(Community Edition), Docker CLI, containerd.io 패키지를 설치
+            $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
-          sudo systemctl start docker  # Docker 서비스를 시작
-          sudo systemctl enable docker  # 시스템 부팅 시 Docker 서비스가 자동으로 시작되도록 설정
+          sudo systemctl start docker
+          sudo systemctl enable docker
 
-          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose  # Docker Compose 바이너리를 다운로드
-          sudo chmod +x /usr/local/bin/docker-compose  # Docker Compose 바이너리에 실행 권한을 부여
-          sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose  # Docker Compose 바이너리를 /usr/bin/docker-compose로 심볼릭 링크를 만듭니다
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}  # Docker Hub에 로그인
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-          docker build -t sunghyun1356/ceos .  # 현재 디렉토리의 Dockerfile을 사용하여 이미지를 빌드하고 태그를 지정
-          docker push sunghyun1356/ceos  # 빌드한 이미지를 Docker Hub에 푸시
+          docker build -t sunghyun1356/ceos .
+          docker push sunghyun1356/ceos
           
-          docker build -f dockerfile-nginx -t sunghyun1356/ceos_nginx .  # dockerfile-nginx를 사용하여 이미지를 빌드하고 태그를 지정
-          docker push sunghyun1356/ceos_nginx  # 빌드한 이미지를 Docker Hub에 푸시
+          docker build -f dockerfile-nginx -t sunghyun1356/ceos_nginx .
+          docker push sunghyun1356/ceos_nginx
 
       - name: executing remote ssh commands using password
-        uses: appleboy/ssh-action@master  # ssh 액션을 사용하여 원격 서버에 명령어를 실행
+        uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}  # SSH 연결할 원격 서버의 호스트 주소
-          username: ubuntu  # SSH 연결할 사용자 이름
-          key: ${{ secrets.KEY }}  # SSH 연결할 때 사용할 키
+          host: ${{ secrets.HOST }}
+          username: ubuntu
+          key: ${{ secrets.KEY }}
           script: |
-            sudo apt-get update  # 시스템 패키지 목록을 업데이트
-            sudo apt-get install -y \  # 필요한 패키지를 설치
-                ca-certificates \  # SSL 인증서 관리 패키지를 설치
-                curl \  # 데이터 전송용 커맨드 라인 도구 curl을 설치
-                gnupg \  # GNU Privacy Guard(GPG) 도구를 설치
-                lsb-release  # 리눅스 표준 베이스 정보를 제공하는 패키지를 설치
-            sudo mkdir -p /etc/apt/keyrings  # apt 키링 디렉토리를 만듭니다
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg  # Docker의 GPG 키를 다운로드하여 apt 키링에 추가
+            sudo apt-get update
+            sudo apt-get install -y \
+                ca-certificates \
+                curl \
+                gnupg \
+                lsb-release
+            sudo mkdir -p /etc/apt/keyrings
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
             echo \
               "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-              $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null  # Docker 저장소를 apt 소스 목록에 추가
-            sudo apt-get update  # Docker 저장소가 추가된 후 패키지 목록을 업데이트
-            sudo apt-get install -y docker-ce docker-ce-cli containerd.io  # Docker CE(Community Edition), Docker CLI, containerd.io 패키지를 설치
-            sudo systemctl start docker  # Docker 서비스를 시작
-            sudo systemctl enable docker  # 시스템 부팅 시 Docker 서비스가 자동으로 시작되도록 설정
-            sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose  # Docker Compose 바이너리를 다운로드
-            sudo chmod +x /usr/local/bin/docker-compose  # Docker Compose 바이너리에 실행 권한을 부여
-            sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose  # Docker Compose 바이너리를 /usr/bin/docker-compose로 심볼릭 링크를 만듭니다
+              $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+            sudo apt-get update
+            sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+            sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
-            ## 원하는 경로로 이동
             cd /home/ubuntu/
             
-            ## .env 파일 생성
             sudo touch .env
-            echo "${{ secrets.ENV_VARS }}" | sudo tee .env > /dev/null  # .env 파일에 환경 변수를 작성
+            echo "${{ secrets.ENV_VARS }}" | sudo tee .env > /dev/null
             
-            ## docker-compose.yaml 파일 생성
             sudo touch docker-compose.yaml
-            echo "${{ vars.DOCKER_COMPOSE }}" | sudo tee docker-compose.yaml > /dev/null  # docker-compose.yaml 파일에 설정 내용을 작성
+            echo "${{ vars.DOCKER_COMPOSE }}" | sudo tee docker-compose.yaml > /dev/null
             
-            ## docker-compose 실행
-            sudo chmod 666 /var/run/docker.sock  # Docker 소켓 파일의 권한을 변경하여 모든 사용자가 접근할 수 있게 합니다
-            sudo docker rm -f $(docker ps -qa)  # 실행 중인 모든 Docker 컨테이너를 중지하고 삭제합니다
-            sudo docker pull sunghyun1356/ceos  # Docker Hub에서 최신 ceos 이미지를 가져옵니다
-            sudo docker pull sunghyun1356/ceos_nginx  # Docker Hub에서 최신 ceos_nginx 이미지를 가져옵니다
-            docker-compose -f docker-compose.yaml --env-file ./.env up -d  # docker-compose를 사용하여 컨테이너를 백그라운드에서 실행합니다
-            docker image prune -f  # 사용하지 않는 Docker 이미지를 삭제합니다
+            sudo chmod 666 /var/run/docker.sock
+            sudo docker rm -f $(docker ps -qa)
+            sudo docker pull sunghyun1356/ceos
+            sudo docker pull sunghyun1356/ceos_nginx
+            docker-compose -f docker-compose.yaml --env-file ./.env up -d
+            docker image prune -f
