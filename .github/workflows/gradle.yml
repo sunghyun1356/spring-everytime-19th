@@ -31,12 +31,6 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew bootJar
 
-      ## Install Docker
-      - name: Install Docker
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker.io docker-compose
-
       ## 웹 이미지 빌드 및 도커허브에 push
       - name: Web Docker build and push
         run: |
@@ -55,6 +49,7 @@ jobs:
           script: |
             ## Install Docker and Docker Compose
             sudo apt-get update
+            sudo apt-get remove -y containerd
             sudo apt-get install -y docker.io docker-compose
 
             ## 여러분이 원하는 경로로 이동합니다.
