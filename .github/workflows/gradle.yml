@@ -1,5 +1,5 @@
 name: Ceos Server
-# test용 commit 6
+# 테스트용 커밋 6
 on:
   push:
     branches: [ "master" ]
@@ -11,28 +11,28 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
+      - name: 체크아웃
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: JDK 17 설정
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Set up NTP
+      - name: NTP 설정
         run: |
           sudo apt-get update
           sudo apt-get install -y ntp
           sudo service ntp start
 
-      - name: permission give for gradlew
+      - name: gradlew에 대한 권한 부여
         run: chmod +x ./gradlew
 
-      - name: Build with Gradle
+      - name: Gradle로 빌드
         run: ./gradlew bootJar -x test
 
-      - name: web docker build and push
+      - name: 웹 도커 빌드 및 푸시
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -63,7 +63,7 @@ jobs:
           docker build -f dockerfile-nginx -t sunghyun1356/ceos_nginx .
           docker push sunghyun1356/ceos_nginx
 
-      - name: executing remote ssh commands using password
+      - name: 패스워드를 사용하여 원격 SSH 명령 실행
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -98,7 +98,7 @@ jobs:
             echo "${{ vars.DOCKER_COMPOSE }}" | sudo tee docker-compose.yaml > /dev/null
             
             sudo chmod 666 /var/run/docker.sock
-            sudo docker rm -f $(docker ps -qa)
+            sudo docker rm -f $(docker ps -qa) || true
             sudo docker pull sunghyun1356/ceos
             sudo docker pull sunghyun1356/ceos_nginx
             docker-compose -f docker-compose.yaml --env-file ./.env up -d
