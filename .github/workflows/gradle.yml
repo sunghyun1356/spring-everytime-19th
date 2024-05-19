@@ -1,5 +1,5 @@
 name: Ceos Server
-
+# test용 commit
 on:
   push:
     branches: [ "master" ]
