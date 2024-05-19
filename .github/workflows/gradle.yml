@@ -15,7 +15,7 @@ jobs:
 
       # 현재 브랜치를 비어있는 ubuntu에 내려받는다
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # 맞는 java 버전 다운로드
       - name: Set up JDK 17
