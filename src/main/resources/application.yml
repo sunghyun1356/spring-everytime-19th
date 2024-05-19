@@ -1,8 +1,9 @@
 spring:
+  #
   datasource:
-    url: ceos-db.catymkthpwcp.ap-northeast-2.rds.amazonaws.com
+    url: ${ secrets.DB_URL }
     username: admin
-    password: Ab1356!!
+    password: ${ secrets.DB_PASSWORD }
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     show-sql: true

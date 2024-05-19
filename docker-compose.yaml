@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3'
 services:
   web:
     image: sunghyun1356/ceos
@@ -7,15 +7,15 @@ services:
     depends_on:
       - db
     environment:
-      SPRING_DATASOURCE_URL: ${{ secrets.DB_URL }}
+      SPRING_DATASOURCE_URL: ${ secrets.DB_URL }
       SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      SPRING_DATASOURCE_PASSWORD: ${ secrets.DB_PASSWORD }
 
   nginx:
     container_name: nginx
     image: sunghyun1356/ceos_nginx
     ports:
-      - 80:80
+      - 81:80
     depends_on:
       - web
 
