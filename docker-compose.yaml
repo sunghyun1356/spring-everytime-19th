@@ -1,9 +1,10 @@
-version: '3'
+version: '4'
 services:
   db:
     image: mysql:latest
+    container_name: ceos_db
     environment:
-      MYSQL_ROOT_PASSWORD: Ab016018!@
+      MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
       MYSQL_DATABASE: ceos
     ports:
       - "3307:3306"
@@ -35,3 +36,6 @@ services:
       -
 volumes:
   db_data:
+networks:
+  ceos:
+    driver : bridge
