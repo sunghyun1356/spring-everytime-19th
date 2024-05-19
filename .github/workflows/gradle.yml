@@ -42,13 +42,12 @@ jobs:
       ## 웹 이미지 빌드 및 도커허브에 push
       - name: web docker build and push
         run: |
-          sudo apt-get update  # 시스템 패키지 목록을 업데이트
+          sudo apt-get update
           sudo apt-get install -y \  
               ca-certificates \  
               curl \  
               gnupg \  
               lsb-release  
-          # 필요한 패키지를 설치 # SSL 인증서 관리 패키지를 설치 # # 데이터 전송용 커맨드 라인 도구 curl을 설치 # GNU Privacy Guard(GPG) 도구를 설치 #리눅스 표준 베이스 정보를 제공하는 패키지를 설치
           sudo mkdir -p /etc/apt/keyrings  # apt 키링 디렉토리를 만듭니다
           curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg  # Docker의 GPG 키를 다운로드하여 apt 키링에 추가
           echo \
