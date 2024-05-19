@@ -1,4 +1,6 @@
-version: '3'
+
+version: '3.4'
+
 services:
   web:
     image: sunghyun1356/ceos
