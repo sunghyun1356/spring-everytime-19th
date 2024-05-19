@@ -74,3 +74,4 @@ jobs:
             sudo docker pull sunghyun1356/ceos_nginx
             sudo docker-compose -f docker-compose.yaml --env-file ./.env up -d
             sudo docker image prune -f
+#
