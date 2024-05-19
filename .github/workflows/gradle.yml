@@ -1,6 +1,6 @@
 name: Deploy Development Server
 
-## develop 브랜치에 push가 되면 실행됩니다d
+## develop 브랜치에 push가 되면 실행됩니다
 on:
   push:
     branches: [ "master" ]
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v4
 
       ## 여러분이 사용하는 버전을 사용하세요
@@ -23,47 +23,53 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      ## giver permissions
+      ## Give permissions
       - name: Give permission
         run: chmod +x ./gradlew
 
-      ## gradle build
+      ## Gradle build
       - name: Build with Gradle
         run: ./gradlew bootJar
 
+      ## Install Docker
+      - name: Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io docker-compose
 
       ## 웹 이미지 빌드 및 도커허브에 push
-      - name: web docker build and push
+      - name: Web Docker build and push
         run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           docker build -t sunghyun1356/ceos .
           docker push sunghyun1356/ceos
           docker build -f dockerfile-nginx -t sunghyun1356/ceos_nginx .
           docker push sunghyun1356/ceos_nginx
 
-      - name: executing remote ssh commands using password
+      - name: Executing remote SSH commands using private key
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ubuntu
           key: ${{ secrets.KEY }}
           script: |
-            
+            ## Install Docker and Docker Compose
+            sudo apt-get update
+            sudo apt-get install -y docker.io docker-compose
+
             ## 여러분이 원하는 경로로 이동합니다.
-                    cd /home/ubuntu/
+            cd /home/ubuntu/
             
             ## .env 파일을 생성합니다.
-                    sudo touch .env
-                    echo "${{ secrets.ENV_VARS }}" | sudo tee .env > /dev/null
+            echo "${{ secrets.ENV_VARS }}" | sudo tee .env > /dev/null
             
             ## docker-compose.yaml 파일을 생성합니다.
-                    sudo touch docker-compose.yaml
-                    echo "${{ vars.DOCKER_COMPOSE }}" | sudo tee docker-compose.yaml > /dev/null
+            echo "${{ vars.DOCKER_COMPOSE }}" | sudo tee docker-compose.yaml > /dev/null
             
             ## docker-compose를 실행합니다.
-                    sudo chmod 666 /var/run/docker.sock
-                    sudo docker rm -f $(docker ps -qa)
-                    sudo docker pull sunghyun1356/ceos
-                    sudo docker pull sunghyun1356/ceos_nginx
-                    docker-compose -f docker-compose.yaml --env-file ./.env up -d
-                    docker image prune -f
+            sudo chmod 666 /var/run/docker.sock
+            sudo docker rm -f $(sudo docker ps -qa)
+            sudo docker pull sunghyun1356/ceos
+            sudo docker pull sunghyun1356/ceos_nginx
+            sudo docker-compose -f docker-compose.yaml --env-file ./.env up -d
+            sudo docker image prune -f
