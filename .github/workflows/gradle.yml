@@ -63,7 +63,7 @@ jobs:
             
             ## docker-compose를 실행합니다.
             sudo chmod 666 /var/run/docker.sock
-            sudo docker rm -f $(sudo docker ps -qa)
+            sudo docker ps -qa | xargs -r sudo docker rm -f
             sudo docker pull sunghyun1356/ceos
             sudo docker pull sunghyun1356/ceos_nginx
             sudo docker-compose -f docker-compose.yaml --env-file ./.env up -d
