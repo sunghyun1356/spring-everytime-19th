@@ -42,7 +42,7 @@ jobs:
       ## 웹 이미지 빌드 및 도커허브에 push
       - name: web docker build and push
         run: |
-          sudo apt-get update
+          sudo apt-get update  # 시스템 패키지 목록을 업데이트
           sudo apt-get install -y \  # 필요한 패키지를 설치
               ca-certificates \  # SSL 인증서 관리 패키지를 설치
               curl \  # 데이터 전송용 커맨드 라인 도구 curl을 설치
@@ -109,9 +109,9 @@ jobs:
             echo "${{ vars.DOCKER_COMPOSE }}" | sudo tee docker-compose.yaml > /dev/null  # docker-compose.yaml 파일에 설정 내용을 작성
             
             ## docker-compose 실행
-            sudo chmod 666 /var/run/docker.sock  # Docker 소켓 파일의 권한을 변경하여 모든 사용자가 접근할 수 있게 
-            sudo docker rm -f $(docker ps -qa)  # 실행 중인 모든 Docker 컨테이너를 중지하고 삭제
+            sudo chmod 666 /var/run/docker.sock  # Docker 소켓 파일의 권한을 변경하여 모든 사용자가 접근할 수 있게 합니다
+            sudo docker rm -f $(docker ps -qa)  # 실행 중인 모든 Docker 컨테이너를 중지하고 삭제합니다
             sudo docker pull sunghyun1356/ceos  # Docker Hub에서 최신 ceos 이미지를 가져옵니다
             sudo docker pull sunghyun1356/ceos_nginx  # Docker Hub에서 최신 ceos_nginx 이미지를 가져옵니다
-            docker-compose -f docker-compose.yaml --env-file ./.env up -d  # docker-compose를 사용하여 컨테이너를 백그라운드에서 실행
-            docker image prune -f  # 사용하지 않는 Docker 이미지를 삭제
+            docker-compose -f docker-compose.yaml --env-file ./.env up -d  # docker-compose를 사용하여 컨테이너를 백그라운드에서 실행합니다
+            docker image prune -f  # 사용하지 않는 Docker 이미지를 삭제합니다
